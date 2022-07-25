@@ -32,13 +32,13 @@ def token_required(f):
             token = request.headers['x-access-token']
 
         if not token:
-            return make_response(jsonify({'message': 'Missing valid access token'}), 401)
+            return make_response(jsonify({'error': 'Missing valid access token'}), 401)
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
             current_user = Users.query.filter_by(public_id=data['public_id']).first()
         except:
-            return make_response(jsonify({'message': 'Invalid access token'}), 401)
+            return make_response(jsonify({'error': 'Invalid access token'}), 401)
 
         return f(current_user, *args, **kwargs)
     return decorator
@@ -51,6 +51,8 @@ def index():
 
 @app.route('/register', methods=['POST'])
 def signup_user():
+    # TODO - Handle empty fields
+
     data = request.get_json()
     email = data['email']
     hashed_password = generate_password_hash(data['password'], method='sha256')
@@ -74,9 +76,11 @@ def login_user():
         return make_response(jsonify({'error': 'Email and password required.'}), 401)
 
     user = Users.query.filter_by(email=email).first()
-    if check_password_hash(user.password, password):
-        token = jwt.encode({'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, app.config['SECRET_KEY'], "HS256")
-        return jsonify({'token': token})
+
+    if user:
+        if check_password_hash(user.password, password):
+            token = jwt.encode({'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, app.config['SECRET_KEY'], "HS256")
+            return jsonify({'token': token})
 
     return make_response(jsonify({'error': 'Wrong email and/or password.'}), 401)
 
