@@ -1,5 +1,5 @@
 # Authentication between JavaScript and Flask API using JSON Web Tokens
-This project serves as a blueprint I can iterate and expand upon in future projects.
+This project serves as a blueprint I can iterate over and expand upon in future projects.
 
 
 ## Installation
