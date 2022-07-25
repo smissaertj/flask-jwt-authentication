@@ -51,19 +51,23 @@ def index():
 
 @app.route('/register', methods=['POST'])
 def signup_user():
-    # TODO - Handle empty fields
 
     data = request.get_json()
     email = data['email']
-    hashed_password = generate_password_hash(data['password'], method='sha256')
+    password = data['password']
 
-    if not Users.query.filter_by(email=email).first():
-        new_user = Users(public_id=str(uuid.uuid4()), email=email, password=hashed_password, admin=False)
-        db.session.add(new_user)
-        db.session.commit()
-        return make_response(jsonify({'success': 'Registration successful'}), 200)
+    if not data or not email or not password:
+        return make_response(jsonify({'error': 'Email and password required'}))
     else:
-        return make_response(jsonify({'error': 'Email address already exists.'}), 409)
+        hashed_password = generate_password_hash(password, method='sha256')
+
+        if not Users.query.filter_by(email=email).first():
+            new_user = Users(public_id=str(uuid.uuid4()), email=email, password=hashed_password, admin=False)
+            db.session.add(new_user)
+            db.session.commit()
+            return make_response(jsonify({'success': 'Registration successful'}), 200)
+        else:
+            return make_response(jsonify({'error': 'Email address already exists.'}), 409)
 
 
 @app.route('/login', methods=['POST'])
