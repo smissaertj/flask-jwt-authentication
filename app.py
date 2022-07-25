@@ -59,9 +59,9 @@ def signup_user():
         new_user = Users(public_id=str(uuid.uuid4()), email=email, password=hashed_password, admin=False)
         db.session.add(new_user)
         db.session.commit()
-        return make_response(jsonify({'message': 'Registration successful'}), 200)
+        return make_response(jsonify({'success': 'Registration successful'}), 200)
     else:
-        return make_response(jsonify({'message': 'Email address already exists.'}), 409)
+        return make_response(jsonify({'error': 'Email address already exists.'}), 409)
 
 
 @app.route('/login', methods=['POST'])
@@ -71,14 +71,14 @@ def login_user():
     password = data['password']
 
     if not data or not email or not password:
-        return make_response(jsonify({'message': 'Email and password required.'}), 401)
+        return make_response(jsonify({'error': 'Email and password required.'}), 401)
 
     user = Users.query.filter_by(email=email).first()
     if check_password_hash(user.password, password):
         token = jwt.encode({'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, app.config['SECRET_KEY'], "HS256")
         return jsonify({'token': token})
 
-    return make_response(jsonify({'message': 'Wrong email and/or password.'}), 401)
+    return make_response(jsonify({'error': 'Wrong email and/or password.'}), 401)
 
 
 @app.route('/users', methods=['GET'])
