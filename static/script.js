@@ -44,6 +44,7 @@ const login = async (email, password) => {
             if (!data['token']) {
                 show_alert(data['error'], 'error')
             } else {
+                show_alert(`Access granted to ${api_url}users.See Console data.`)
                 getUserData(data['token'])
             }
         })
@@ -59,7 +60,7 @@ const getUserData = async (token) => {
         headers: {"Content-Type": "application/json", "x-access-token": token}
     })
         .then((response) => response.json())
-        .then((data) => console.log(data));
+        .then((data) => console.log(data['users']));
 }
 
 
